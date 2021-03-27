@@ -124,3 +124,46 @@ def check_state():
         return eval
     else:
         return -eval
+  
+#Start with the worst possible number, calculate score for each legal move
+#Execute best move
+#https://www.chessprogramming.org/Alpha-Beta - Use information from here
+#I originally thought of using just alpha beta but found that this version
+#could stabilise my code much more
+def alphabeta_prune(alpha, beta, depthleft):
+    best = -9999
+    if depthleft == 0:
+        return quiesce( alpha, beta );
+    for move in board.legal_moves:
+        board.push(move)   
+        score = -alphabeta_prune( -beta, -alpha, depthleft - 1 )
+        board.pop()
+        if score >= beta:
+            return score
+        if score > best:
+            bestscore = score
+        if score > alpha:
+            alpha = score   
+    return bestscore
+
+#Searches all available moves using quiscence search
+   
+def quiesce (alpha, beta):
+    stand_pat = check_state();
+    if stand_pat >= beta:
+        return beta;
+    if alpha < stand_pat:
+        alpha = stand_pat;
+    
+    for move in board.legal_moves:
+        if board.is_capture(move):
+            board.push(move)        
+            score = -quiesce( -beta, -alpha )
+            board.pop()
+            
+            if score >= beta:
+                return beta
+            if score > alpha:
+                alpha = score  
+    return alpha
+        
